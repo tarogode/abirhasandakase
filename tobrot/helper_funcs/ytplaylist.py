@@ -23,7 +23,7 @@ from tobrot import (
 
 async def yt_playlist_downg(message, i_m_sefg, G_DRIVE):
     url = message.text
-    usr = message.message_id
+    usr = message.from_user.id
     messa_ge = i_m_sefg.reply_to_message
     fol_der = f"{usr}youtube"
     print(url)

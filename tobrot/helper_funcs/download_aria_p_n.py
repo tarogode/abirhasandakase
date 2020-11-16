@@ -4,8 +4,6 @@
 
 # the logging things
 import logging
-import sys
-sys.setrecursionlimit(10**4)
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -55,7 +53,7 @@ async def aria_start():
     aria2_daemon_start_cmd.append("--seed-time=1")
     aria2_daemon_start_cmd.append("--max-overall-upload-limit=1K")
     aria2_daemon_start_cmd.append("--split=10")
-    aria2_daemon_start_cmd.append(f"--bt-stop-timeout={MAX_TIME_TO_WAIT_FOR_TORRENTS_TO_START}")
+    #aria2_daemon_start_cmd.append(f"--bt-stop-timeout={MAX_TIME_TO_WAIT_FOR_TORRENTS_TO_START}")
     #
     LOGGER.info(aria2_daemon_start_cmd)
     #
@@ -96,7 +94,7 @@ def add_magnet(aria_instance, magnetic_link, c_file_name):
 
 def add_torrent(aria_instance, torrent_file_path):
     if torrent_file_path is None:
-        return False, "**FAILED** \n" + str(e) + " \nsomething wrongings when trying to add <u>TORRENT</u> file"
+        return False, "**FAILED** \n" + str(e) + " \nsomething happend wrong when trying to add <u>TORRENT</u> file. \n\n @AbirHasan2005 Please review this. \n"
     if os.path.exists(torrent_file_path):
         # Add Torrent Into Queue
         try:
@@ -174,7 +172,7 @@ async def call_apropriate_function(
                 None
             )
         else:
-            return False, "can't get metadata \n\n#stopped"
+            return False, "Ops, \nCan't get metadata \n@AbirHasan2005 Please review this! \n#stopped"
     await asyncio.sleep(1)
     file = aria_instance.get_download(err_message)
     to_upload_file = file.name
@@ -205,17 +203,8 @@ async def call_apropriate_function(
     #
     if to_upload_file:
         if CUSTOM_FILE_NAME:
-            if os.path.isfile(to_upload_file):
-                os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
-                to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
-            else:
-                for root, dirs, files in os.walk(to_upload_file):
-                    LOGGER.info(files)
-                    for org in files:
-                        p_name = f"{root}/{org}"
-                        n_name = f"{root}/{CUSTOM_FILE_NAME}{org}"
-                        os.rename(p_name, n_name)
-                to_upload_file = to_upload_file
+            os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
+            to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
         else:
             to_upload_file = to_upload_file
 
@@ -228,6 +217,7 @@ async def call_apropriate_function(
     response = {}
     LOGGER.info(response)
     user_id = user_message.from_user.id
+    #LOGGER.info(user_id)
     if com_g:
         final_response = await upload_to_tg(
             sent_message_to_update_tg_p,
@@ -235,6 +225,7 @@ async def call_apropriate_function(
             user_id,
             response
         )
+    LOGGER.info(final_response)
     try:
         message_to_send = ""
         for key_f_res_se in final_response:
@@ -249,9 +240,9 @@ async def call_apropriate_function(
             message_to_send += "</a>"
             message_to_send += "\n"
         if message_to_send != "":
-            mention_req_user = f"<a href='tg://user?id={user_id}'>Your Requested Files</a>\n\n"
+            mention_req_user = f"<a href='tg://user?id={user_id}'>Your Requested Files</a>\n\n@AbirHasan2005 Please Review them!\n"
             message_to_send = mention_req_user + message_to_send
-            message_to_send = message_to_send + "\n\n" + "#uploads"
+            message_to_send = message_to_send + "\n" + "#uploads"
         else:
             message_to_send = "<i>FAILED</i> to upload files. 😞😞"
         await user_message.reply_text(
@@ -305,7 +296,7 @@ async def call_apropriate_function_g(
                 None
             )
         else:
-            return False, "can't get metadata \n\n#stopped"
+            return False, "Ops, \nCan't get metadata \n@AbirHasan2005 Please review them! \n#stopped"
     await asyncio.sleep(1)
     file = aria_instance.get_download(err_message)
     to_upload_file = file.name
@@ -336,17 +327,8 @@ async def call_apropriate_function_g(
     #
     if to_upload_file:
         if CUSTOM_FILE_NAME:
-            if os.path.isfile(to_upload_file):
-                os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
-                to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
-            else:
-                for root, dirs, files in os.walk(to_upload_file):
-                    LOGGER.info(files)
-                    for org in files:
-                        p_name = f"{root}/{org}"
-                        n_name = f"{root}/{CUSTOM_FILE_NAME}{org}"
-                        os.rename(p_name, n_name)
-                to_upload_file = to_upload_file
+            os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
+            to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
         else:
             to_upload_file = to_upload_file
 
@@ -368,11 +350,82 @@ async def call_apropriate_function_g(
             user_id
         )
 #
+async def call_apropriate_function_t(
+    to_upload_file_g,
+    sent_message_to_update_tg_p,
+    is_unzip,
+    is_unrar,
+    is_untar
+):
+    #
+    to_upload_file = to_upload_file_g
+    if is_unzip:
+        check_ifi_file = await unzip_me(to_upload_file_g)
+        if check_ifi_file is not None:
+            to_upload_file = check_ifi_file
+    #
+    if is_unrar:
+        check_ife_file = await unrar_me(to_upload_file_g)
+        if check_ife_file is not None:
+            to_upload_file = check_ife_file
+    #
+    if is_untar:
+        check_ify_file = await untar_me(to_upload_file_g)
+        if check_ify_file is not None:
+            to_upload_file = check_ify_file
+    #
+    response = {}
+    LOGGER.info(response)
+    user_id = sent_message_to_update_tg_p.reply_to_message.from_user.id
+    final_response = await upload_to_gdrive(
+        to_upload_file,
+        sent_message_to_update_tg_p
+    )
+    LOGGER.info(final_response)
+    #if to_upload_file:
+        #if CUSTOM_FILE_NAME:
+            #os.rename(to_upload_file, f"{CUSTOM_FILE_NAME}{to_upload_file}")
+            #to_upload_file = f"{CUSTOM_FILE_NAME}{to_upload_file}"
+        #else:
+            #to_upload_file = to_upload_file
+
+    #if cstom_file_name:
+        #os.rename(to_upload_file, cstom_file_name)
+        #to_upload_file = cstom_file_name
+    #else:
+        #to_upload_file = to_upload_file
+    '''
+    
+    LOGGER.info(final_response)
+    message_to_send = ""
+    for key_f_res_se in final_response:
+        local_file_name = key_f_res_se
+        message_id = final_response[key_f_res_se]
+        channel_id = str(AUTH_CHANNEL)[4:]
+        private_link = f"https://t.me/c/{channel_id}/{message_id}"
+        message_to_send += "👉 <a href='"
+        message_to_send += private_link
+        message_to_send += "'>"
+        message_to_send += local_file_name
+        message_to_send += "</a>"
+        message_to_send += "\n"
+    if message_to_send != "":
+        mention_req_user = f"<a href='tg://user?id={user_id}'>Your Requested Files</a>\n\n"
+        message_to_send = mention_req_user + message_to_send
+        message_to_send = message_to_send + "\n\n" + "#uploads"
+    else:
+        message_to_send = "<i>FAILED</i> to upload files. 😞😞"
+    await sent_message_to_update_tg_p.reply_to_message.reply_text(
+        text=message_to_send,
+        quote=True,
+        disable_web_page_preview=True
+    )
+    return True, None
+    '''
 
 
 # https://github.com/jaskaranSM/UniBorg/blob/6d35cf452bce1204613929d4da7530058785b6b1/stdplugins/aria.py#L136-L164
 async def check_progress_for_dl(aria2, gid, event, previous_message):
-    #g_id = event.reply_to_message.from_user.id
     try:
         file = aria2.get_download(gid)
         complete = file.is_complete
@@ -392,9 +445,9 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
                     pass
                 #
                 if is_file is None :
-                   msgg = f"Conn: {file.connections} <b>|</b> GID: <code>{gid}</code>"
+                   msgg = f"Ping: {file.connections} <b>|</b> ID: <code>{gid}</code>"
                 else :
-                   msgg = f"P: {file.connections} | S: {file.num_seeders} <b>|</b> GID: <code>{gid}</code>"
+                   msgg = f"Peers: {file.connections} | Seeders: {file.num_seeders} <b>|</b> ID: <code>{gid}</code>"
                 msg = f"\n`{downloading_dir_name}`"
                 msg += f"\n<b>Speed</b>: {file.download_speed_string()}"
                 msg += f"\n<b>Status</b>: {file.progress_string()} <b>of</b> {file.total_length_string()} <b>|</b> {file.eta_string()} <b>|</b> {msgg}"
@@ -427,7 +480,7 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
             await check_progress_for_dl(aria2, gid, event, previous_message)
         else:
             await asyncio.sleep(EDIT_SLEEP_TIME_OUT)
-            await event.edit(f"Downloaded Successfully: `{file.name}` 🤒")
+            await event.edit(f"Downloaded Successfully: `{file.name}`")
             return True
     except aria2p.client.ClientException:
         pass
@@ -436,7 +489,7 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
     except RecursionError:
         file.remove(force=True)
         await event.edit(
-            "Download Auto Canceled :\n\n"
+            "Download Auto Canceled:\n\n"
             "Your Torrent/Link is Dead.".format(
                 file.name
             )
@@ -445,7 +498,7 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
     except Exception as e:
         LOGGER.info(str(e))
         if " not found" in str(e) or "'file'" in str(e):
-            await event.edit("Download Canceled :\n<code>{}</code>".format(file.name))
+            await event.edit("Download Canceled:\n<code>{}</code>".format(file.name))
             return False
         else:
             LOGGER.info(str(e))

@@ -26,6 +26,7 @@ from tobrot import (
 )
 from tobrot.helper_funcs.display_progress_g import progress_for_pyrogram_g
 from tobrot.helper_funcs.upload_to_tg import upload_to_gdrive
+from tobrot.helper_funcs.download_aria_p_n import call_apropriate_function_t
 from tobrot.helper_funcs.create_compressed_archive import unzip_me, unrar_me, untar_me
 
 async def down_load_media_f(client, message):
@@ -43,7 +44,7 @@ async def down_load_media_f(client, message):
             file_name=download_location,
             progress=progress_for_pyrogram_g,
             progress_args=(
-                "trying to download", mess_age, c_time
+                "Trying to download! Please Wait ...", mess_age, c_time
             )
         )
         end_t = datetime.now()
@@ -76,4 +77,4 @@ async def down_load_media_f(client, message):
             LOGGER.info(gaut_response)
     else:
         #await asyncio.sleep(4)
-        await mess_age.edit_text("Reply to a Telegram Media, to upload to the Cloud Drive.")
+        await mess_age.edit_text("Reply to a Telegram Media, to upload to @AbirHasan2005's Cloud Drive.")
